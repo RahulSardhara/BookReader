@@ -38,6 +38,8 @@ import androidx.navigation.compose.rememberNavController
 import com.rahul.bookreader.componets.EmailInput
 import com.rahul.bookreader.componets.PasswordInput
 import com.rahul.bookreader.componets.ReaderLogo
+import com.rahul.bookreader.navigation.ReaderScreens
+import com.rahul.bookreader.screens.home.ReaderHomeScreen
 import com.rahul.bookreader.ui.theme.AppColor
 
 @Composable
@@ -52,11 +54,15 @@ fun ReaderLoginScreen(navController: NavController = rememberNavController()) {
             ReaderLogo()
             if (showLoginForm.value) {
                 UserFrom(loading = viewModel.loading.value?:false, isCreateAccount = false) { email, pwd ->
-                    viewModel.signIn(email, pwd)
+                    viewModel.signIn(email, pwd){
+                       navController.navigate(ReaderScreens.HomeScreen.name)
+                    }
                 }
             } else {
                 UserFrom(loading =  viewModel.loading.value?:false, isCreateAccount = true) { email, pwd ->
-                    viewModel.createAccount(email, pwd)
+                    viewModel.createAccount(email, pwd){
+                        navController.navigate(ReaderScreens.HomeScreen.name)
+                    }
                 }
             }
 

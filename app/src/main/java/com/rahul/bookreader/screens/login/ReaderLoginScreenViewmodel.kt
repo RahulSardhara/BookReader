@@ -15,12 +15,13 @@ class ReaderLoginScreenViewmodel : ViewModel() {
     val loading: MutableLiveData<Boolean> = _loading
 
 
-    fun createAccount(email: String, password: String) = viewModelScope.launch {
+    fun createAccount(email: String, password: String,home:()-> Unit) = viewModelScope.launch {
         _loading.value = true
         try {
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
+                        home.invoke()
                         _loading.value = false
                     } else {
                         _loading.value = false
@@ -31,12 +32,13 @@ class ReaderLoginScreenViewmodel : ViewModel() {
         }
     }
 
-    fun signIn(email: String, password: String) = viewModelScope.launch {
+    fun signIn(email: String, password: String,home:()-> Unit) = viewModelScope.launch {
         _loading.value = true
         try {
             auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
+                        home.invoke()
                         _loading.value = false
                     } else {
                         _loading.value = false
