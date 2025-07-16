@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.rahul.bookreader.componets.EmailInput
@@ -41,6 +42,8 @@ import com.rahul.bookreader.ui.theme.AppColor
 
 @Composable
 fun ReaderLoginScreen(navController: NavController = rememberNavController()) {
+    val viewModel: ReaderLoginScreenViewmodel = viewModel<ReaderLoginScreenViewmodel>()
+
     val showLoginForm = remember {
         mutableStateOf(true)
     }
@@ -48,12 +51,12 @@ fun ReaderLoginScreen(navController: NavController = rememberNavController()) {
         Column(verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.CenterHorizontally) {
             ReaderLogo()
             if (showLoginForm.value) {
-                UserFrom(loading = false, isCreateAccount = false) { email, pwd ->
-
+                UserFrom(loading = viewModel.loading.value?:false, isCreateAccount = false) { email, pwd ->
+                    viewModel.signIn(email, pwd)
                 }
             } else {
-                UserFrom(loading = false, isCreateAccount = true) { email, pwd ->
-                    // Handle create account logic here
+                UserFrom(loading =  viewModel.loading.value?:false, isCreateAccount = true) { email, pwd ->
+                    viewModel.createAccount(email, pwd)
                 }
             }
 
