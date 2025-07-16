@@ -9,6 +9,7 @@ import com.rahul.bookreader.screens.home.ReaderHomeScreen
 import com.rahul.bookreader.screens.login.ReaderLoginScreen
 import com.rahul.bookreader.screens.search.ReaderSearchScreen
 import com.rahul.bookreader.screens.splash.ReaderSplashScreen
+import com.rahul.bookreader.screens.stats.ReaderStatsScreen
 
 @Composable
 fun ReaderNavigation() {
@@ -27,6 +28,11 @@ fun ReaderNavigation() {
         composable(ReaderScreens.LoginScreen.name){
             ReaderLoginScreen(navController = navController)
         }
+
+        composable(ReaderScreens.StatsScreen.name){
+            ReaderStatsScreen(navController = navController)
+        }
+
 
     }
 }

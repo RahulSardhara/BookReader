@@ -1,27 +1,63 @@
 package com.rahul.bookreader.componets
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import coil3.compose.rememberAsyncImagePainter
+import com.google.firebase.auth.FirebaseAuth
+import com.rahul.bookreader.model.MBook
+import com.rahul.bookreader.navigation.ReaderScreens
+import com.rahul.bookreader.ui.theme.AppColor
 
 
 @Composable
@@ -123,3 +159,164 @@ fun PasswordVisibility(passwordVisibility: MutableState<Boolean>) {
     }
 
 }
+
+@Composable
+fun TitleSection(modifier: Modifier = Modifier, label: String) {
+    Surface(modifier = modifier.padding(start = 5.dp, top = 1.dp)) {
+        Column {
+            Text(text = label, fontSize = 19.sp, fontStyle = FontStyle.Normal, textAlign = TextAlign.Left)
+        }
+    }
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ReaderAppBar(
+    title: String,
+    showProfile: Boolean = true,
+    navController: NavController
+) {
+    TopAppBar(
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (showProfile) {
+                    Icon(
+                        imageVector = Icons.Default.Face,
+                        contentDescription = "Logout",
+                        tint = Color.Black.copy(0.7f)
+                    )
+                }
+                Text(
+                    text = title,
+                    modifier = Modifier.padding(start = if (showProfile) 8.dp else 0.dp),
+                    color = Color.Red.copy(0.7f),
+                    style = androidx.compose.ui.text.TextStyle(fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                )
+
+                Spacer(modifier = Modifier.width(150.dp))
+
+
+            }
+        }, actions = {
+            IconButton(onClick = {
+                FirebaseAuth.getInstance().signOut().run {
+                    navController.navigate(ReaderScreens.LoginScreen.name)
+                }
+            }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.Logout,
+                    contentDescription = "Logout",
+                    tint = Color.Red.copy(0.7f)
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(Color.Transparent)
+    )
+}
+
+
+
+@Composable
+fun FABContent(onTap: (String) -> Unit) {
+    FloatingActionButton(onClick = {
+        onTap.invoke("")
+    }, contentColor = AppColor.Purple80, shape = RoundedCornerShape(50.dp)) {
+
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "Add Book",
+            tint = Color.Black
+        )
+    }
+
+}
+
+
+@Composable
+fun BookRating(score: Double = 4.5) {
+    Surface(
+        modifier = Modifier
+            .height(70.dp)
+            .padding(4.dp), shape = RoundedCornerShape(56.dp),
+        tonalElevation = 6.dp,
+        shadowElevation = 6.dp,
+        color = Color.White
+    ) {
+        Column(modifier = Modifier.padding(4.dp)) {
+            Icon(imageVector = Icons.Filled.StarBorder, contentDescription = "icon", modifier = Modifier.padding(bottom = 1.dp))
+            Text(text = score.toString(), style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+}
+
+
+
+@Preview(showBackground = true)
+@Composable
+fun RoundedButtons(label: String = "", radius: Int = 29, onPress: () -> Unit = {}) {
+    Surface(modifier = Modifier.clip(RoundedCornerShape(bottomEndPercent = radius, topStartPercent = radius)), color = Color(0XFF92CBDF)) {
+        Column(
+            modifier = Modifier
+                .width(90.dp)
+                .heightIn(40.dp)
+                .clickable {
+                    onPress.invoke()
+                }, verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = label, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ListCard(book: MBook = MBook(title = "Android Internals - Volume I", author = "Jonathan Levin", notes = "A Confectioner's Cookbook", photoUrl = "https://books.google.com/books/content?id=onhDnwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"), onPressDetails: (String) -> Unit = {}) {
+    val context = LocalContext.current
+    val displayMetrics = context.resources.displayMetrics
+    val screenWidth = displayMetrics.widthPixels / displayMetrics.density
+    val spacing = 10.dp
+
+    Card(
+        shape = RoundedCornerShape(29.dp), colors = CardDefaults.cardColors(Color.White), elevation = CardDefaults.cardElevation(6.dp), modifier = Modifier
+            .padding(16.dp)
+            .height(252.dp)
+            .width(202.dp)
+            .clickable {
+                onPressDetails.invoke(book.title.toString())
+            }) {
+
+        Column(modifier = Modifier.width(screenWidth.dp - (spacing * 2)), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.Start) {
+            Row(horizontalArrangement = Arrangement.Center) {
+                Image(
+                    painter = rememberAsyncImagePainter(model = book.photoUrl),
+                    contentDescription = "Book Image",
+                    modifier = Modifier
+                        .height(140.dp)
+                        .width(100.dp)
+                        .padding(4.dp)
+                )
+
+
+                Spacer(modifier = Modifier.width(50.dp))
+
+                Column(modifier = Modifier.padding(top = 25.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(imageVector = Icons.Rounded.FavoriteBorder, contentDescription = "icon", modifier = Modifier.padding(bottom = 1.dp))
+                    BookRating(score = 3.5)
+                }
+            }
+            Text(text = book.title, modifier = Modifier.padding(4.dp), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(text = "Authors: ${book.author}", modifier = Modifier.padding(4.dp), maxLines = 1, overflow = TextOverflow.Clip)
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.Bottom) {
+                RoundedButtons(label = "Reading", radius = 70) {
+
+                }
+            }
+        }
+
+    }
+
+}
+
+
+
