@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.rahul.bookreader.model.MUser
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class ReaderLoginScreenViewmodel : ViewModel() {
@@ -21,6 +24,8 @@ class ReaderLoginScreenViewmodel : ViewModel() {
             auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
+                        val displayName = task.result.user?.email?.split('@')?.get(0)
+                        createUser(displayName)
                         home.invoke()
                         _loading.value = false
                     } else {
@@ -29,6 +34,19 @@ class ReaderLoginScreenViewmodel : ViewModel() {
                 }
         } catch (e: Exception) {
             _loading.value = false
+        }
+    }
+
+    private fun createUser(displayName: String?) {
+        viewModelScope.launch {
+            displayName?.let { name ->
+                val userId = auth.currentUser?.uid
+                userId?.let {
+                    val user = MUser(userId = it, displayName = name, avatarUrl = "", quote = "Life is gret", profession = "android developer", id = "").toMap()
+                    FirebaseFirestore.getInstance().collection("users").add(user)
+                }
+
+            }
         }
     }
 
