@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
@@ -39,7 +40,7 @@ import com.rahul.bookreader.model.MBook
 import com.rahul.bookreader.navigation.ReaderScreens
 
 @Composable
-fun ReaderHomeScreen (navController: NavController = rememberNavController()) {
+fun ReaderHomeScreen(navController: NavController = rememberNavController(), viewModel: HomeScreenViewModel = hiltViewModel()) {
 
     Scaffold(topBar = {
         ReaderAppBar(title = "Book Reader", navController = navController)
@@ -53,7 +54,7 @@ fun ReaderHomeScreen (navController: NavController = rememberNavController()) {
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            HomeContent(navController = navController)
+            HomeContent(navController = navController, viewModel)
         }
 
     }
@@ -61,26 +62,16 @@ fun ReaderHomeScreen (navController: NavController = rememberNavController()) {
 
 @Preview(showBackground = true)
 @Composable
-fun HomeContent(navController: NavController = rememberNavController()) {
-
-    val listOfBooks = listOf(
-        MBook(id = "1", title = "Clean Code: A Handbook of Agile Software Craftsmanship", author = "Robert C. Martin",
-            notes = "", photoUrl = "https://books.google.com/books/content?id=_i6bDeoCQzsC&printsec=frontcover&img=1&zoom=1&source=gbs_api"
-        ),
-        MBook(id = "2", title = "The Pragmatic Programmer: Your Journey to Mastery", author = "David Thomas, Andrew Hunt",
-            notes = "", photoUrl = "https://books.google.com/books/content?id=llFWDwAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
-        ),
-        MBook(id = "3", title = "Effective Java", author = "Joshua Bloch",
-            notes = "", photoUrl = "https://books.google.com/books/content?id=ka2VUBqHiWkC&printsec=frontcover&img=1&zoom=1&source=gbs_api"
-        ),
-        MBook(id = "4", title = "Android Programming: The Big Nerd Ranch Guide", author = "Bill Phillips, Chris Stewart, Kristin Marsicano",
-            notes = "", photoUrl = "https://books.google.com/books/content?id=bSbwDwAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
-        ),
-        MBook(id = "5", title = "Kotlin in Action", author = "Dmitry Jemerov, Svetlana Isakova",
-            notes = "", photoUrl = "https://books.google.com/books/content?id=l7voDwAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
-        )
-    )
-
+fun HomeContent(navController: NavController = rememberNavController(), viewModel: HomeScreenViewModel = hiltViewModel()) {
+    var listOfBooks = emptyList<MBook>()
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    listOfBooks = if (viewModel.data.value.data.isNullOrEmpty()) {
+        viewModel.data.value.data?.toList()?.filter { mBook ->
+            mBook.userId == currentUser?.uid
+        } ?: emptyList()
+    } else {
+        viewModel.data.value.data ?: emptyList()
+    }
 
     val currentUserNamer = FirebaseAuth.getInstance().currentUser?.email?.split('@')?.get(0) ?: "Guest"
     Column(modifier = Modifier.padding(0.dp), verticalArrangement = Arrangement.Top) {
@@ -101,7 +92,7 @@ fun HomeContent(navController: NavController = rememberNavController()) {
                 HorizontalDivider()
             }
         }
-        ListCard(listOfBooks[0])
+        ListCard(listOfBooks.getOrNull(0))
         ReadingRightNowArea(boolList = listOf(), navController = navController)
         TitleSection(label = "Reading List", modifier = Modifier.padding(start = 5.dp))
         BookListArea(listOfBooks = listOfBooks, navController)
@@ -113,8 +104,10 @@ fun HomeContent(navController: NavController = rememberNavController()) {
 
 @Composable
 fun BookListArea(listOfBooks: List<MBook>, navController: NavController) {
+    val addedBook =listOfBooks
 
     HorizontalScrollableComponent(listOfBooks){
+        navController.navigate(ReaderScreens.UpdateScreen.name + "/${it.googleBookId}")
 
     }
 }

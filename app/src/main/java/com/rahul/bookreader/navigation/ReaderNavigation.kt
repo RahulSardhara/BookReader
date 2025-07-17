@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.rahul.bookreader.screens.details.ReaderBookDetailsScreen
 import com.rahul.bookreader.screens.home.ReaderHomeScreen
 import com.rahul.bookreader.screens.login.ReaderLoginScreen
@@ -38,12 +39,22 @@ fun ReaderNavigation() {
             ReaderSearchScreen(navController = navController)
         }
 
-        composable(ReaderScreens.DetailsScreen.name) {
-            ReaderBookDetailsScreen(navController = navController)
+        composable(ReaderScreens.DetailsScreen.name + "/{bookItemId}", arguments = listOf(navArgument("bookItemId") {
+            type = androidx.navigation.NavType.StringType
+        })) { backStackEntry ->
+            backStackEntry.arguments?.getString("bookItemId")?.let { bookItemId ->
+                ReaderBookDetailsScreen(navController = navController, bookItemId = bookItemId)
+            }
         }
-        composable(ReaderScreens.UpdateScreen.name) {
-            ReaderUpdateScreen(navController = navController)
+
+        composable(ReaderScreens.UpdateScreen.name + "/{bookItemId}", arguments = listOf(navArgument("bookItemId") {
+            type = androidx.navigation.NavType.StringType
+        })) { backStackEntry ->
+            backStackEntry.arguments?.getString("bookItemId")?.let { bookItemId ->
+                ReaderUpdateScreen(navController = navController, bookItemId = bookItemId)
+            }
         }
+
 
     }
 }

@@ -1,6 +1,7 @@
 package com.rahul.bookreader.screens.search
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -36,6 +38,7 @@ import coil3.compose.rememberAsyncImagePainter
 import com.rahul.bookreader.componets.ReaderAppBar
 import com.rahul.bookreader.componets.SearchForm
 import com.rahul.bookreader.model.Item
+import com.rahul.bookreader.navigation.ReaderScreens
 
 @Preview(showBackground = true)
 @Composable
@@ -68,7 +71,7 @@ fun ReaderSearchScreen(navController: NavController = rememberNavController(), v
 fun BookList(navController: NavController, viewModel: BookSearchViewModel) {
 
     if (viewModel.listOfBooks.value.loading == true) {
-        CircularProgressIndicator()
+        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
     }
     LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp)) {
         viewModel.listOfBooks.value.data?.let {
@@ -89,7 +92,9 @@ fun BookRow(book: Item = Item(), navController: NavController = rememberNavContr
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(3.dp),
+            .padding(3.dp).clickable{
+                navController.navigate(ReaderScreens.DetailsScreen.name + "/${book.id}")
+            },
         shape = RectangleShape, elevation = CardDefaults.elevatedCardElevation(7.dp),
     ) {
         Row(modifier = Modifier.padding(5.dp), verticalAlignment = Alignment.Top)
@@ -108,7 +113,7 @@ fun BookRow(book: Item = Item(), navController: NavController = rememberNavContr
             }
         }
     }
-
+0
 
 }
 

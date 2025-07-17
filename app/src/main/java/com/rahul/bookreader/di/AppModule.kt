@@ -1,8 +1,10 @@
 package com.rahul.bookreader.di
 
 import androidx.room.Insert
+import com.google.firebase.firestore.FirebaseFirestore
 import com.rahul.bookreader.network.BooksAPI
 import com.rahul.bookreader.repository.BookRepository
+import com.rahul.bookreader.repository.FireRepository
 import com.rahul.bookreader.utils.Constants.BASEURL
 import dagger.Component
 import dagger.Module
@@ -32,5 +34,11 @@ object AppModule {
     @Provides
     fun provideBookRepository(bookAPI: BooksAPI): BookRepository {
         return BookRepository(bookAPI)
+    }
+
+    @Singleton
+    @Provides
+    fun provideFireRepository(): FireRepository {
+        return FireRepository(query = FirebaseFirestore.getInstance().collection("books"))
     }
 }

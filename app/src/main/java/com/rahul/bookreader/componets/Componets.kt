@@ -1,5 +1,11 @@
 package com.rahul.bookreader.componets
 
+import android.content.Context
+import android.view.MotionEvent
+import android.widget.Toast
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,16 +41,21 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -60,6 +71,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil3.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
+import com.rahul.bookreader.R
 import com.rahul.bookreader.model.MBook
 import com.rahul.bookreader.navigation.ReaderScreens
 import com.rahul.bookreader.ui.theme.AppColor
@@ -290,50 +302,52 @@ fun RoundedButtons(label: String = "", radius: Int = 29, onPress: () -> Unit = {
 
 @Preview(showBackground = true)
 @Composable
-fun ListCard(book: MBook = MBook(title = "Android Internals - Volume I", author = "Jonathan Levin", notes = "A Confectioner's Cookbook", photoUrl = "https://books.google.com/books/content?id=onhDnwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"), onPressDetails: (String) -> Unit = {}) {
+fun ListCard(book: MBook? = MBook(title = "Android Internals - Volume I", authors = "Jonathan Levin", notes = "A Confectioner's Cookbook", photoUrl = "https://books.google.com/books/content?id=onhDnwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"), onPressDetails: (String) -> Unit = {}) {
     val context = LocalContext.current
     val displayMetrics = context.resources.displayMetrics
     val screenWidth = displayMetrics.widthPixels / displayMetrics.density
     val spacing = 10.dp
+    book?.let {
+        Card(
+            shape = RoundedCornerShape(29.dp), colors = CardDefaults.cardColors(Color.White), elevation = CardDefaults.cardElevation(6.dp), modifier = Modifier
+                .padding(16.dp)
+                .height(252.dp)
+                .width(202.dp)
+                .clickable {
+                    onPressDetails.invoke(book.title.toString())
+                }) {
 
-    Card(
-        shape = RoundedCornerShape(29.dp), colors = CardDefaults.cardColors(Color.White), elevation = CardDefaults.cardElevation(6.dp), modifier = Modifier
-            .padding(16.dp)
-            .height(252.dp)
-            .width(202.dp)
-            .clickable {
-                onPressDetails.invoke(book.title.toString())
-            }) {
-
-        Column(modifier = Modifier.width(screenWidth.dp - (spacing * 2)), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.Start) {
-            Row(horizontalArrangement = Arrangement.Center) {
-                Image(
-                    painter = rememberAsyncImagePainter(model = book.photoUrl),
-                    contentDescription = "Book Image",
-                    modifier = Modifier
-                        .height(140.dp)
-                        .width(100.dp)
-                        .padding(4.dp)
-                )
+            Column(modifier = Modifier.width(screenWidth.dp - (spacing * 2)), verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.Start) {
+                Row(horizontalArrangement = Arrangement.Center) {
+                    Image(
+                        painter = rememberAsyncImagePainter(model = book.photoUrl),
+                        contentDescription = "Book Image",
+                        modifier = Modifier
+                            .height(140.dp)
+                            .width(100.dp)
+                            .padding(4.dp)
+                    )
 
 
-                Spacer(modifier = Modifier.width(50.dp))
+                    Spacer(modifier = Modifier.width(50.dp))
 
-                Column(modifier = Modifier.padding(top = 25.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(imageVector = Icons.Rounded.FavoriteBorder, contentDescription = "icon", modifier = Modifier.padding(bottom = 1.dp))
-                    BookRating(score = 3.5)
+                    Column(modifier = Modifier.padding(top = 25.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(imageVector = Icons.Rounded.FavoriteBorder, contentDescription = "icon", modifier = Modifier.padding(bottom = 1.dp))
+                        BookRating(score = 3.5)
+                    }
+                }
+                Text(text = book.title.toString(), modifier = Modifier.padding(4.dp), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(text = "Authors: ${book.authors}", modifier = Modifier.padding(4.dp), maxLines = 1, overflow = TextOverflow.Clip)
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.Bottom) {
+                    RoundedButtons(label = "Reading", radius = 70) {
+
+                    }
                 }
             }
-            Text(text = book.title, modifier = Modifier.padding(4.dp), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(text = "Authors: ${book.author}", modifier = Modifier.padding(4.dp), maxLines = 1, overflow = TextOverflow.Clip)
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.Bottom) {
-                RoundedButtons(label = "Reading", radius = 70) {
 
-                }
-            }
         }
-
     }
+
 
 }
 
@@ -365,3 +379,58 @@ fun SearchForm(
     }
 }
 
+@ExperimentalComposeUiApi
+@Composable
+fun RatingBar(
+    modifier: Modifier = Modifier,
+    rating: Int,
+    onPressRating: (Int) -> Unit
+) {
+    var ratingState by remember {
+        mutableStateOf(rating)
+    }
+
+    var selected by remember {
+        mutableStateOf(false)
+    }
+    val size by animateDpAsState(
+        targetValue = if (selected) 42.dp else 34.dp,
+        spring(Spring.DampingRatioMediumBouncy)
+    )
+
+    Row(
+        modifier = Modifier.width(280.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        for (i in 1..5) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_baseline_star_24),
+                contentDescription = "star",
+                modifier = modifier
+                    .width(size)
+                    .height(size)
+                    .pointerInteropFilter {
+                        when (it.action) {
+                            MotionEvent.ACTION_DOWN -> {
+                                selected = true
+                                onPressRating(i)
+                                ratingState = i
+                            }
+                            MotionEvent.ACTION_UP -> {
+                                selected = false
+                            }
+                        }
+                        true
+                    },
+                tint = if (i <= ratingState) Color(0xFFFFD700) else Color(0xFFA2ADB1)
+            )
+        }
+    }
+}
+
+
+fun showToast(context: Context, msg: String) {
+    Toast.makeText(context, msg, Toast.LENGTH_LONG)
+        .show()
+}
