@@ -35,11 +35,16 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -174,8 +179,10 @@ fun TitleSection(modifier: Modifier = Modifier, label: String) {
 @Composable
 fun ReaderAppBar(
     title: String,
+    icon: ImageVector? = null,
     showProfile: Boolean = true,
-    navController: NavController
+    navController: NavController,
+    onBackArrowClicked: () -> Unit = {}
 ) {
     TopAppBar(
         title = {
@@ -186,6 +193,16 @@ fun ReaderAppBar(
                         contentDescription = "Logout",
                         tint = Color.Black.copy(0.7f)
                     )
+                }
+
+                if (icon != null) {
+                    Icon(
+                        imageVector = icon, contentDescription = "Back Arrow",
+                        modifier = Modifier.clickable { onBackArrowClicked.invoke() },
+                        tint = Color.Black.copy(0.7f)
+                    )
+                    Spacer(modifier = Modifier.width(40.dp))
+
                 }
                 Text(
                     text = title,
@@ -204,11 +221,13 @@ fun ReaderAppBar(
                     navController.navigate(ReaderScreens.LoginScreen.name)
                 }
             }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Logout,
-                    contentDescription = "Logout",
-                    tint = Color.Red.copy(0.7f)
-                )
+                if (showProfile) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Logout,
+                        contentDescription = "Logout",
+                        tint = Color.Red.copy(0.7f)
+                    )
+                }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(Color.Transparent)
@@ -318,5 +337,31 @@ fun ListCard(book: MBook = MBook(title = "Android Internals - Volume I", author 
 
 }
 
+@Preview(showBackground = true)
+@Composable
+fun SearchForm(
+    modifier: Modifier = Modifier,
+    loading: Boolean = false,
+    hint: String = "Search",
+    onSearch: (String) -> Unit = {}) {
+    Column {
+        val searchQueryState = rememberSaveable { mutableStateOf("") }
+        val keyboardController = LocalSoftwareKeyboardController.current
+        val valid = remember(searchQueryState.value) {
+            searchQueryState.value.trim().isNotEmpty()
 
+        }
+
+        InputField(valueState = searchQueryState,
+            labelId = "Search",
+            enabled = true,
+            onAction = KeyboardActions {
+                if (!valid) return@KeyboardActions
+                onSearch(searchQueryState.value.trim())
+                searchQueryState.value = ""
+                keyboardController?.hide()
+            })
+
+    }
+}
 

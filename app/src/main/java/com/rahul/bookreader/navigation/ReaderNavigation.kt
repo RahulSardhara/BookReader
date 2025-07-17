@@ -1,15 +1,16 @@
 package com.rahul.bookreader.navigation
 
-import android.window.SplashScreen
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.rahul.bookreader.screens.details.ReaderBookDetailsScreen
 import com.rahul.bookreader.screens.home.ReaderHomeScreen
 import com.rahul.bookreader.screens.login.ReaderLoginScreen
 import com.rahul.bookreader.screens.search.ReaderSearchScreen
 import com.rahul.bookreader.screens.splash.ReaderSplashScreen
 import com.rahul.bookreader.screens.stats.ReaderStatsScreen
+import com.rahul.bookreader.screens.update.ReaderUpdateScreen
 
 @Composable
 fun ReaderNavigation() {
@@ -33,6 +34,16 @@ fun ReaderNavigation() {
             ReaderStatsScreen(navController = navController)
         }
 
+        composable(ReaderScreens.SearchScreen.name) {
+            ReaderSearchScreen(navController = navController)
+        }
+
+        composable(ReaderScreens.DetailsScreen.name) {
+            ReaderBookDetailsScreen(navController = navController)
+        }
+        composable(ReaderScreens.UpdateScreen.name) {
+            ReaderUpdateScreen(navController = navController)
+        }
 
     }
 }
